@@ -130,20 +130,16 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 
 	req.Header.Set("Content-Type", "application/json")
 
-	// Set authentication information
-	if c.Authentication.authType == authTypeSession {
-		// Set session cookie if there is one
-		if c.session != nil {
-			for _, cookie := range c.session.Cookies {
-				req.AddCookie(cookie)
-			}
+	if c.client.Jar != nil {
+		for _, cookie := range c.client.Jar.Cookies(u) {
+			//fmt.Printf("cookie %s=%s\n", cookie.Name, cookie.Value)
+			req.AddCookie(cookie)
 		}
-	} else if c.Authentication.authType == authTypeBasic {
+	}
 		// Set basic auth information
 		if c.Authentication.username != "" {
 			req.SetBasicAuth(c.Authentication.username, c.Authentication.password)
 		}
-	}
 
 	return req, nil
 }
